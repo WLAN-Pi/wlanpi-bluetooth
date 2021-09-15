@@ -1,0 +1,6 @@
+wlanpi-bluetooth (1.0.1) unstable; urgency=medium
+
+  * Debianised package
+
+ -- Jiri Brejcha <jirka@jiribrejcha.net>  Wed, 15 Sep 2021 07:00:34 -0500
+
