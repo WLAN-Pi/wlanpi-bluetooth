@@ -7,7 +7,7 @@ Standards-Version: 3.9.8
 Homepage: https://github.com/WLAN-Pi/wlanpi-bluetooth
 
 Package: wlanpi-bluetooth
-Version: 1.0.1
+Version: 1.0.2
 Section: base
 Priority: optional
 Architecture: any
