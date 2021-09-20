@@ -4,7 +4,7 @@ wlanpi-bluetooth (1.0.1) unstable; urgency=medium
 
  -- Jiri Brejcha <jirka@jiribrejcha.net>  Wed, 15 Sep 2021 07:00:34 -0500
 
-wlanpi-bluetooth (1.0.1) unstable; urgency=medium
+wlanpi-bluetooth (1.0.2) unstable; urgency=medium
 
   * Transition from patch to sed, transition to use deb systemd installer
 
