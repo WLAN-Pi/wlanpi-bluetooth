@@ -1,15 +1,17 @@
 Source: wlanpi-bluetooth
 Section: embedded
-Priority: extra
+Priority: optional
 Maintainer: Jiri Brejcha <jirka@jiribrejcha.net>
 Build-Depends: debhelper (>=9), build-essential
 Standards-Version: 3.9.8
 Homepage: https://github.com/WLAN-Pi/wlanpi-bluetooth
 
 Package: wlanpi-bluetooth
+Version: 1.0.1
+Section: base
+Priority: optional
 Architecture: any
 Multi-Arch: foreign
-Pre-Depends: bluez-tools
-Depends: ${misc:Depends}, ${shlibs:Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}, bluez-tools
 Description: WLAN Pi Bluetooth features
  Enabled Bluetooth features on the WLAN Pi.
