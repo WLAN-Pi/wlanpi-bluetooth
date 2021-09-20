@@ -1,159 +1,37 @@
 #!/bin/bash
 
-# Installation script
+# Update Avahi for pan0
+sudo sed -i 's/#domain-name=local/domain-name=local/' /etc/avahi/avahi-daemon.conf
+sudo sed -i 's/publish-hinfo=no/publish-hinfo=yes/' /etc/avahi/avahi-daemon.conf
+sudo sed -i 's/publish-workstation=no/publish-workstation=yes/' /etc/avahi/avahi-daemon.conf
+sudo sed -i '/allow-interfaces/ {/pan0/! s/$/, pan0/ }' /etc/avahi/avahi-daemon.conf
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-echo "script is running in $SCRIPT_DIR"
 
-############################################################################
-# enable a dhcp server for pan0
-tee wlanpi_isc_dhcp_pan0.patch <<EOF
---- isc-dhcp-server_orig	2021-09-14 13:09:02.000000000 +0100
-+++ isc-dhcp-server	2021-09-14 12:34:53.000000000 +0100
-@@ -1,3 +1,3 @@
- DHCPDv4_CONF=/etc/dhcp/dhcpd.conf
- DHCPDv4_PID=/var/run/dhcpd.pid
--INTERFACESv4="usb0"
-+INTERFACESv4="usb0 pan0"
-EOF
+############################################################################################
+# Setup DHCP for pan0                                                                      #
+############################################################################################
 
-# Apply the patch and then remove the temporary file
-cd /etc/default
-sudo patch -p0 < $SCRIPT_DIR/wlanpi_isc_dhcp_pan0.patch
-cd $SCRIPT_DIR
-rm wlanpi_isc_dhcp_pan0.patch
-############################################################################
+# Define the pan0 DHCP scope
+panDHCP=$(cat <<-EOT
 
-############################################################################
-# configure the pan0 subnet
-tee wlanpi_dhcp_subnet_pan0.patch <<EOF
---- dhcpd_orig.conf	2021-09-14 13:08:40.000000000 +0100
-+++ dhcpd.conf	2021-09-14 12:35:16.000000000 +0100
-@@ -116,3 +116,14 @@
- default-lease-time 86400;
- max-lease-time 86400;
- }
-+
-+subnet 172.20.1.0 netmask 255.255.255.0 {
-+interface pan0;
-+range 172.20.1.2 172.20.1.30;
-+option domain-name-servers wlanpi.local;
-+option domain-name "wlanpi.local";
-+option broadcast-address 172.20.1.254;
-+option routers 172.20.1.1;
-+default-lease-time 86400;
-+max-lease-time 86400;
-+}
-EOF
+# pan0 DHCP scope
+subnet 172.20.1.0 netmask 255.255.255.0 {
+interface pan0;
+range 172.20.1.2 172.20.1.30;
+option domain-name-servers wlanpi.local;
+option domain-name "wlanpi.local";
+option broadcast-address 172.20.1.254;
+option routers 172.20.1.1;
+default-lease-time 86400;
+max-lease-time 86400;
+}
+EOT
+)
 
-# Apply the patch and then remove the temporary file
-cd /etc/dhcp
-sudo patch -p0 < $SCRIPT_DIR/wlanpi_dhcp_subnet_pan0.patch
-cd $SCRIPT_DIR
-rm wlanpi_dhcp_subnet_pan0.patch
-############################################################################
+# Add pan0 to isc-dhcp-server if it is not already enabled
+sudo sed -i '/INTERFACESv4/ {/pan0/! s/"/ pan0"/2 }' /etc/default/isc-dhcp-server
 
-sudo service isc-dhcp-server restart
-
-############################################################################
-# Update Avahi to work over pan0
-# Enable hinfo and workstation. Required for the BT Pan
-
-# Create an avahi patch and apply it
-tee wlanpi_avahi_pan0.patch <<EOF
---- avahi-daemon_orig.conf	2021-09-14 13:09:19.000000000 +0100
-+++ avahi-daemon.conf	2021-09-14 12:33:55.000000000 +0100
-@@ -20,11 +20,11 @@
- 
- [server]
- #host-name=foo
--#domain-name=local
-+domain-name=local
- #browse-domains=0pointer.de, zeroconf.org
- use-ipv4=yes
- use-ipv6=yes
--allow-interfaces=usb0, eth0, wlan0
-+allow-interfaces=usb0, eth0, wlan0, pan0
- #deny-interfaces=wlan0, wlan1
- #check-response-ttl=no
- #use-iff-running=no
-@@ -46,8 +46,8 @@
- #disable-user-service-publishing=no
- #add-service-cookie=no
- #publish-addresses=yes
--publish-hinfo=no
--publish-workstation=no
-+publish-hinfo=yes
-+publish-workstation=yes
- #publish-domain=yes
- #publish-dns-servers=192.168.50.1, 192.168.50.2
- #publish-resolv-conf-dns-servers=yes
-EOF
-
-cd /etc/avahi
-sudo patch -p0 < $SCRIPT_DIR/wlanpi_avahi_pan0.patch
-cd $SCRIPT_DIR
-rm wlanpi_avahi_pan0.patch
-############################################################################
-
-# ensure the avahi-daemon is running and restart it
-sudo systemctl enable avahi-daemon.service
-sudo systemctl start avahi-daemon.service
-sudo systemctl restart avahi-daemon.service
-
-############################################################################
-# get the BT PAN up and running
-sudo apt-get install bluez-tools
-
-sudo tee /etc/systemd/network/pan0.netdev <<EOF
-[NetDev]
-Name=pan0
-Kind=bridge
-EOF
- 
- 
-sudo tee /etc/systemd/network/pan0.network <<EOF
-[Match]
-Name=pan0
-[Network]
-Address=172.20.1.1/24
-DHCPServer=yes
-EOF
- 
-sudo tee /etc/systemd/system/bt-agent.service <<EOF
-[Unit]
-Description=Bluetooth Auth Agent
- 
-[Service]
-#ExecStart=/usr/bin/bt-agent -c NoInputNoOutput
-ExecStart=/bin/sh -c '/usr/bin/yes | /usr/bin/bt-agent --capability=NoInputNoOutput' #autoaccept
-Type=simple
- 
-[Install]
-WantedBy=multi-user.target
-EOF
- 
-sudo tee /etc/systemd/system/bt-network.service <<EOF
-[Unit]
-Description=Bluetooth NEP PAN
-After=pan0.network
-[Service]
-ExecStart=/usr/bin/bt-network -s nap pan0
-Type=simple
-[Install]
-WantedBy=multi-user.target
-EOF
-
-sudo systemctl enable systemd-networkd
-sudo systemctl enable bt-agent
-sudo systemctl enable bt-network
-sudo systemctl start systemd-networkd
-sudo systemctl start bt-agent
-sudo systemctl start bt-network
-
-sudo bt-adapter --set Discoverable 1
-############################################################################
-
-# Restart the DHCP server again to be sure
-sudo service isc-dhcp-server restart
-
+# Append the pan0 DHCP config if there isn't one already
+if ! grep -q "interface pan0" /etc/dhcp/dhcpd.conf; then
+	echo "$panDHCP" | sudo tee -a /etc/dhcp/dhcpd.conf > /dev/null
+fi
