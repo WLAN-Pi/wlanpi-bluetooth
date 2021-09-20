@@ -10,3 +10,12 @@
 
 override_dh_auto_install:
 	dh_auto_install -- prefix=/usr
+
+override_dh_installinit:
+	dh_installinit --name=bt-timedpair
+	dh_installinit --name=bt-agent
+	dh_installinit --name=bt-network
+
+override_dh_systemd_enable:
+	dh_systemd_enable --name=bt-agent
+	dh_systemd_enable --name=bt-network
