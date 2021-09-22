@@ -4,7 +4,7 @@ Description=Bluetooth Auth Agent
 [Service]
 ExecStart=/bin/sh -c '/usr/bin/yes | /usr/bin/bt-agent --capability=NoInputNoOutput' #autoaccept
 ExecStartPost=bt-adapter --set Discoverable 0
-ExecStartPost=bt-adapter --set Pairable 
+ExecStartPost=bt-adapter --set Pairable 0
 TimeoutStopSec=5
 Type=simple
  
