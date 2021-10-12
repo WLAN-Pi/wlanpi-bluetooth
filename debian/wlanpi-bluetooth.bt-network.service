@@ -1,5 +1,6 @@
 [Unit]
 Description=Bluetooth NEP PAN
+Requires=bluetooth.target
 After=pan0.network
 
 [Service]
