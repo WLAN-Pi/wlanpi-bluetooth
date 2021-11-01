@@ -1,2 +1,2 @@
-etc/systemd/network/* etc/systemd/network/
-etc/wlanpi-bluetooth/state etc/wlanpi-bluetooth/
+etc/systemd/network/* /etc/systemd/network/
+etc/wlanpi-bluetooth/state /etc/wlanpi-bluetooth/
