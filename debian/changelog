@@ -1,3 +1,11 @@
+wlanpi-bluetooth (1.0.3) unstable; urgency=medium
+
+  * Creates unique alias based on adapter's MAC address
+  * Uses /etc/wlanpi-bluetooth/state to remember adapter's state (on/off)
+    across reboots
+
+ -- Adrian Granados <adrian@intuitibits.com>  Mon, 01 Nov 2021 18:27:54 -0500
+
 wlanpi-bluetooth (1.0.2) unstable; urgency=medium
 
   * Transition from patch to sed, transition to use deb systemd installer
