@@ -1,3 +1,9 @@
+wlanpi-bluetooth (1.0.4) unstable; urgency=medium
+
+  * Simplifies the bt-agent service 
+
+ -- Adrian Granados <adrian@intuitibits.com>  Tue, 02 Nov 2021 10:02:28 -0500
+
 wlanpi-bluetooth (1.0.3) unstable; urgency=medium
 
   * Creates unique alias based on adapter's MAC address
