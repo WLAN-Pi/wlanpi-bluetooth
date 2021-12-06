@@ -1,3 +1,9 @@
+wlanpi-bluetooth (1.0.5) unstable; urgency=medium
+
+  * Fixes dependencies on other services 
+
+ -- Adrian Granados <adrian@intuitibits.com>  Mon, 06 Dec 2021 12:26:49 -0600
+
 wlanpi-bluetooth (1.0.4) unstable; urgency=medium
 
   * Simplifies the bt-agent service 
