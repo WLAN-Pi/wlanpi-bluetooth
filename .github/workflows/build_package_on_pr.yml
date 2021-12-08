@@ -1,11 +1,14 @@
 name: Build Debian Package On PR
 on:
+  # Allow manual runs of workflow from Actions tab
+  workflow_dispatch:
+  
   pull_request:
     paths:
       - 'debian/changelog'
 
 jobs:
-  build:
+  sbuild:
     runs-on: 'ubuntu-20.04'
 
     strategy:
