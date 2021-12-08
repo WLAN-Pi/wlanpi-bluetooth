@@ -8,12 +8,13 @@ on:
       - 'debian/changelog'
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  sbuild:
+    runs-on: 'ubuntu-20.04'
 
     strategy:
+      fail-fast: false
       matrix:
-        distro: [buster]
+        distro: [buster,bullseye]
         arch: [armhf,arm64]
 
     environment: PACKAGECLOUD
@@ -29,10 +30,10 @@ jobs:
           distro: ${{ matrix.distro }}
           arch: ${{ matrix.arch }}
 
-      - name: Upload artifact to GitHub
+      - name: Archive artifacts and upload to GitHub
         uses: actions/upload-artifact@v2
         with:
-          name: wlanpi-bluetooth_package
+          name: wlanpi-bluetooth-{{ matrix.distro }}-${{ matrix.arch }}
           path: ${{ steps.build-debian-package.outputs.deb-package }}
 
       - name: Upload package to packagecloud
@@ -43,3 +44,18 @@ jobs:
           packagecloud-repo: dev
           packagecloud-distrib: raspbian/${{ matrix.distro }}
           packagecloud-token: ${{ secrets.PACKAGECLOUD_TOKEN }}
+
+  slack-workflow-status:
+    if: always()
+    name: Post Workflow Status to Slack
+    needs:
+      - sbuild
+    runs-on: 'ubuntu-20.04'
+    steps:
+      - name: Slack Workflow Notification
+        uses: Gamesight/slack-workflow-status@master
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          channel: '#bluetooth'
+          name: 'WLAN Pi CI Bot'
