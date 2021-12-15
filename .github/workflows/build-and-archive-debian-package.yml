@@ -1,17 +1,16 @@
-name: Build and deploy to packagecloud
-
+name: Build and Archive Debian Package
 on:
   # Allow manual runs of workflow from Actions tab
   workflow_dispatch:
   
-  push:
-    branches:
-      - main
+  pull_request:
     paths:
       - 'debian/changelog'
 
 jobs:
   sbuild:
+    name: sbuild ${{ matrix.distro }}+${{ matrix.arch }}
+
     runs-on: 'ubuntu-20.04'
 
     strategy:
@@ -19,9 +18,7 @@ jobs:
       matrix:
         distro: [buster,bullseye]
         arch: [armhf,arm64]
-
-    environment: PACKAGECLOUD
-
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -39,15 +36,6 @@ jobs:
           name: wlanpi-bluetooth-{{ matrix.distro }}-${{ matrix.arch }}
           path: ${{ steps.build-debian-package.outputs.deb-package }}
 
-      - name: Upload package to packagecloud
-        uses: danielmundi/upload-packagecloud@main
-        with:
-          package-name: ${{ steps.build-debian-package.outputs.deb-package }}
-          packagecloud-username: wlanpi
-          packagecloud-repo: dev
-          packagecloud-distrib: raspbian/${{ matrix.distro }}
-          packagecloud-token: ${{ secrets.PACKAGECLOUD_TOKEN }}
-
   slack-workflow-status:
     if: always()
     name: Post Workflow Status to Slack
@@ -60,5 +48,3 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-          channel: '#bluetooth'
-          name: 'WLAN Pi CI Bot'
