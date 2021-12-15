@@ -7,11 +7,8 @@ Standards-Version: 3.9.8
 Homepage: https://github.com/WLAN-Pi/wlanpi-bluetooth
 
 Package: wlanpi-bluetooth
-Version: 1.0.2
-Section: base
-Priority: optional
 Architecture: any
 Multi-Arch: foreign
 Depends: ${misc:Depends}, ${shlibs:Depends}, bluez-tools
-Description: WLAN Pi Bluetooth features
- Enabled Bluetooth features on the WLAN Pi.
+Description: WLAN Pi Bluetooth
+ Enable Bluetooth features on the WLAN Pi.
