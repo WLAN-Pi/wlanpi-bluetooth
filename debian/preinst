@@ -15,13 +15,13 @@ sudo sed -i '/allow-interfaces/ {/pan0/! s/$/, pan0/ }' /etc/avahi/avahi-daemon.
 panDHCP=$(cat <<-EOT
 
 # pan0 DHCP scope
-subnet 172.20.1.0 netmask 255.255.255.0 {
+subnet 169.254.43.0 netmask 255.255.255.0 {
 interface pan0;
-range 172.20.1.2 172.20.1.30;
+range 169.254.43.2 169.254.43.30;
 option domain-name-servers wlanpi.local;
 option domain-name "wlanpi.local";
-option broadcast-address 172.20.1.254;
-option routers 172.20.1.1;
+option broadcast-address 169.254.43.255;
+option routers 169.254.43.1;
 default-lease-time 86400;
 max-lease-time 86400;
 }
