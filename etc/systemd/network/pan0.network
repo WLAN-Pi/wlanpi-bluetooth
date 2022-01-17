@@ -1,5 +1,5 @@
 [Match]
 Name=pan0
 [Network]
-Address=172.20.1.1/24
+Address=169.254.43.1/24
 DHCPServer=yes
