@@ -5,33 +5,3 @@ sudo sed -i 's/#domain-name=local/domain-name=local/' /etc/avahi/avahi-daemon.co
 sudo sed -i 's/publish-hinfo=no/publish-hinfo=yes/' /etc/avahi/avahi-daemon.conf
 sudo sed -i 's/publish-workstation=no/publish-workstation=yes/' /etc/avahi/avahi-daemon.conf
 sudo sed -i '/allow-interfaces/ {/pan0/! s/$/, pan0/ }' /etc/avahi/avahi-daemon.conf
-
-
-############################################################################################
-# Setup DHCP for pan0                                                                      #
-############################################################################################
-
-# Define the pan0 DHCP scope
-panDHCP=$(cat <<-EOT
-
-# pan0 DHCP scope
-subnet 169.254.43.0 netmask 255.255.255.0 {
-interface pan0;
-range 169.254.43.2 169.254.43.30;
-option domain-name-servers wlanpi.local;
-option domain-name "wlanpi.local";
-option broadcast-address 169.254.43.255;
-option routers 169.254.43.1;
-default-lease-time 86400;
-max-lease-time 86400;
-}
-EOT
-)
-
-# Add pan0 to isc-dhcp-server if it is not already enabled
-sudo sed -i '/INTERFACESv4/ {/pan0/! s/"/ pan0"/2 }' /etc/default/isc-dhcp-server
-
-# Append the pan0 DHCP config if there isn't one already
-if ! grep -q "interface pan0" /etc/dhcp/dhcpd.conf; then
-	echo "$panDHCP" | sudo tee -a /etc/dhcp/dhcpd.conf > /dev/null
-fi
