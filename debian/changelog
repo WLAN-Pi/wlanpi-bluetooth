@@ -3,7 +3,7 @@ wlanpi-bluetooth (1.0.7) unstable; urgency=medium
   * Disables ISC DHCP server on pan0 and uses networkd DHCP server defined in /etc/systemd/network/pan0.network instead
   * Stops announcing router option to DHCP clients
 
- -- Jiri Brejcha <jirka@jiribrejcha.net>  Mon, 17 Jan 2022 22:03:34 +0000
+ -- Jiri Brejcha <jirka@jiribrejcha.net>  Tue, 18 Jan 2022 10:25:04 +0000
  
 wlanpi-bluetooth (1.0.6) unstable; urgency=medium
 
