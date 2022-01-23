@@ -8,3 +8,4 @@ IPv6AcceptRA=no
 DHCPServer=yes
 [DHCPServer]
 EmitRouter=no
+PoolSize=10
