@@ -1,3 +1,9 @@
+wlanpi-bluetooth (1.0.8) unstable; urgency=medium
+
+  * Uses WLAN Pi hostname as Bluetooth Alias
+
+ -- Jiri Brejcha <jirka@jiribrejcha.net>  Tue, 25 Jan 2022 22:44:00 +0000
+
 wlanpi-bluetooth (1.0.7) unstable; urgency=medium
 
   * Disables ISC DHCP server on pan0 and uses networkd DHCP server defined in /etc/systemd/network/pan0.network instead
