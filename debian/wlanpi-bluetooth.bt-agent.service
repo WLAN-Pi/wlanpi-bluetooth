@@ -6,7 +6,7 @@ BindsTo=bluetooth.service
  
 [Service]
 ExecStart=/bin/sh -c "bt-agent --capability=NoInputNoOutput"
-ExecStartPost=/bin/sh -c "bt-adapter --set Alias wlanpi-`bt-adapter -i | grep Address | awk '{ print $2 }' | sed 's/://g' | tail -c 7`"
+ExecStartPost=/bin/sh -c "bt-adapter --set Alias `hostname`"
 ExecStartPost=/bin/sh -c "bt-adapter --set Powered `cat /etc/wlanpi-bluetooth/state`"
 ExecStartPost=/bin/sh -c "bt-adapter --set Pairable 0"
 TimeoutStopSec=5
