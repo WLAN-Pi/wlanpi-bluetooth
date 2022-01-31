@@ -2,8 +2,8 @@
 Description=Bluetooth Pair Agent
  
 [Service]
-ExecStart=bt-adapter --set PairableTimeout 30
-ExecStart=bt-adapter --set DiscoverableTimeout 30
-ExecStart=bt-adapter --set Pairable 1
-ExecStart=bt-adapter --set Discoverable 1
+ExecStart=bt-adapter -a hci0 --set PairableTimeout 30
+ExecStart=bt-adapter -a hci0 --set DiscoverableTimeout 30
+ExecStart=bt-adapter -a hci0 --set Pairable 1
+ExecStart=bt-adapter -a hci0 --set Discoverable 1
 Type=oneshot
