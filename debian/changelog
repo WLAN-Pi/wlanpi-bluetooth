@@ -1,6 +1,12 @@
+wlanpi-bluetooth (1.0.8-2) unstable; urgency=medium
+
+  * Turns off the second bluetooth radio (hci1), if present
+
+ -- Adrian Granados <adrian@intuitibits.com>  Mon, 31 Jan 2022 21:29:15 -0600
+
 wlanpi-bluetooth (1.0.8-1) unstable; urgency=medium
 
-  * Changes supporting services to refer to hci0 explicitly.
+  * Changes supporting services to refer to hci0 explicitly
 
  -- Adrian Granados <adrian@intuitibits.com>  Sun, 30 Jan 2022 22:04:28 -0600
 
