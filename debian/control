@@ -10,5 +10,5 @@ Package: wlanpi-bluetooth
 Architecture: any
 Multi-Arch: foreign
 Depends: ${misc:Depends}, ${shlibs:Depends}, bluez-tools
-Description: WLAN Pi Bluetooth
+Description: WLAN Pi - bluetooth
  Enable Bluetooth features on the WLAN Pi.
