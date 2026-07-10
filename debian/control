@@ -10,6 +10,6 @@ Homepage: https://github.com/WLAN-Pi/wlanpi-bluetooth
 Package: wlanpi-bluetooth
 Architecture: any
 Multi-Arch: foreign
-Depends: ${misc:Depends}, ${shlibs:Depends}, bluez-tools
+Depends: ${misc:Depends}, ${shlibs:Depends}, bluez-tools, avahi-daemon
 Description: WLAN Pi - bluetooth
  Enable Bluetooth features on the WLAN Pi.

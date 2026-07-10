@@ -1,0 +1,13 @@
+#!/bin/bash
+set -e
+
+# Update Avahi for pan0. Guarded: avahi-daemon is a dependency, but do
+# not fail the install if its conffile is absent for any reason.
+if [ "$1" = "configure" ] && [ -f /etc/avahi/avahi-daemon.conf ]; then
+	sed -i 's/#domain-name=local/domain-name=local/' /etc/avahi/avahi-daemon.conf
+	sed -i 's/publish-hinfo=no/publish-hinfo=yes/' /etc/avahi/avahi-daemon.conf
+	sed -i 's/publish-workstation=no/publish-workstation=yes/' /etc/avahi/avahi-daemon.conf
+	sed -i '/allow-interfaces/ {/pan0/! s/$/, pan0/ }' /etc/avahi/avahi-daemon.conf
+fi
+
+#DEBHELPER#
