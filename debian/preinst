@@ -1,7 +1,0 @@
-#!/bin/bash
-
-# Update Avahi for pan0
-sudo sed -i 's/#domain-name=local/domain-name=local/' /etc/avahi/avahi-daemon.conf
-sudo sed -i 's/publish-hinfo=no/publish-hinfo=yes/' /etc/avahi/avahi-daemon.conf
-sudo sed -i 's/publish-workstation=no/publish-workstation=yes/' /etc/avahi/avahi-daemon.conf
-sudo sed -i '/allow-interfaces/ {/pan0/! s/$/, pan0/ }' /etc/avahi/avahi-daemon.conf
