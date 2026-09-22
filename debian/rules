@@ -19,3 +19,6 @@ override_dh_installinit:
 override_dh_systemd_enable:
 	dh_systemd_enable --name=bt-agent
 	dh_systemd_enable --name=bt-network
+
+override_dh_systemd_start:
+	dh_systemd_start bt-agent.service bt-network.service
