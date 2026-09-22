@@ -1,12 +1,16 @@
 [Unit]
 Description=Bluetooth NEP PAN
-Requires=bluetooth.target
-After=network.target bluetooth.target
+# Lazy-load when the controller exists, like bt-agent. Starting at
+# multi-user.target pulled bluetooth.target (and bt-agent) in before BlueZ was
+# up, and bt-network then died immediately.
+After=network.target bluetooth.service
 BindsTo=bluetooth.service
 
 [Service]
+# See bt-agent.service: unblock the soft-blocked adapter before use.
+ExecStartPre=/usr/sbin/rfkill unblock bluetooth
 ExecStart=/usr/bin/bt-network -s nap pan0
 Type=simple
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=bluetooth.target

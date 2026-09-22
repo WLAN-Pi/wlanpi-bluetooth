@@ -1,3 +1,25 @@
+wlanpi-bluetooth (1.0.12) unstable; urgency=medium
+
+  * bt-agent/bt-network: lazy-load from bluetooth.target instead of
+    multi-user.target so they start only once the controller exists and BlueZ
+    is up. Starting at multi-user made bt-agent block ~25s on BlueZ's D-Bus
+    and abort (intf_supported assertion), and delayed multi-user.target,
+    because bluetooth.service is condition-skipped until the hci device
+    appears. bt-network likewise died immediately.
+  * bt-agent/bt-network: unblock the soft-blocked adapter
+    (rfkill.default_state=0) with "rfkill unblock bluetooth" in ExecStartPre.
+    Without it, bt-adapter --set Powered fails with org.bluez.Error.Failed on
+    USB Bluetooth adapters (for example the M4+ Intel BE200), which the
+    on-board rfkill whitelist does not cover.
+  * bt-agent: retry power restoration while BlueZ transitions the adapter out
+    of rfkill, and run bt-agent directly so systemd tracks the real process.
+    Stop it directly because bluez-tools can hang indefinitely while
+    unregistering its agent over D-Bus.
+  * Migrate existing enablement links from multi-user.target to
+    bluetooth.target during package upgrades.
+
+ -- Josh Schmelzle <josh@joshschmelzle.com>  Tue, 22 Sep 2026 14:30:00 -0400
+
 wlanpi-bluetooth (1.0.11) unstable; urgency=medium
 
   * Move avahi configuration from preinst to postinst: preinst runs at
@@ -82,4 +104,3 @@ wlanpi-bluetooth (1.0.1) unstable; urgency=medium
   * Debianised package
 
  -- Jiri Brejcha <jirka@jiribrejcha.net>  Wed, 15 Sep 2021 07:00:34 -0500
-

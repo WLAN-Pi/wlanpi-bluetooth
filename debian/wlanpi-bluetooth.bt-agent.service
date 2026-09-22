@@ -1,17 +1,26 @@
 [Unit]
 Description=Bluetooth Auth Agent
-Requires=bluetooth.target
-After=bluetooth.target
+# Start only once the controller exists (bluetooth.target is pulled in by the
+# hci device) and BlueZ is up. Previously this was WantedBy=multi-user.target,
+# so it started before BlueZ existed, blocked ~25s on BlueZ's D-Bus and aborted.
+After=bluetooth.service
 BindsTo=bluetooth.service
- 
+
 [Service]
-ExecStart=/bin/sh -c "/usr/bin/bt-agent --capability=NoInputNoOutput"
+# The adapter ships rfkill soft-blocked (rfkill.default_state=0). Unblock it
+# before touching the adapter, or bt-adapter --set Powered fails with
+# org.bluez.Error.Failed. BlueZ's AutoEnable then powers it on.
+ExecStartPre=/usr/sbin/rfkill unblock bluetooth
+ExecStart=/usr/bin/bt-agent --capability=NoInputNoOutput
 ExecStartPost=/bin/sh -c "/usr/bin/bt-adapter -a hci0 --set Alias `hostname`"
-ExecStartPost=/bin/sh -c "/usr/bin/bt-adapter -a hci0 --set Powered `cat /etc/wlanpi-bluetooth/state`"
+ExecStartPost=/bin/sh -c 'for i in 1 2 3 4 5 6 7 8 9 10; do /usr/bin/bt-adapter -a hci0 --set Powered "$(cat /etc/wlanpi-bluetooth/state)" && exit 0; sleep 0.5; done; exit 1'
 ExecStartPost=/bin/sh -c "/usr/bin/bt-adapter -a hci0 --set Pairable 0"
 ExecStartPost=/bin/sh -c "/usr/bin/hciconfig hci1 > /dev/null && /usr/bin/bt-adapter -a hci1 --set Powered 0 || :"
-TimeoutStopSec=5
+# bluez-tools can hang forever unregistering its agent over D-Bus. Closing the
+# process connection unregisters it in BlueZ, so stop it directly.
+KillSignal=SIGKILL
+SuccessExitStatus=SIGKILL
 Type=simple
- 
+
 [Install]
-WantedBy=multi-user.target
+WantedBy=bluetooth.target

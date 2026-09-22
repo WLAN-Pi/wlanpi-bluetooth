@@ -11,3 +11,7 @@ if [ "$1" = "configure" ] && [ -f /etc/avahi/avahi-daemon.conf ]; then
 fi
 
 #DEBHELPER#
+
+if [ "$1" = "configure" ] && [ -d /run/systemd/system ]; then
+	systemctl reenable bt-agent.service bt-network.service >/dev/null
+fi
