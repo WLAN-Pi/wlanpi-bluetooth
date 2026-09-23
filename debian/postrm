@@ -1,3 +1,6 @@
 #!/bin/bash
+set -e
 
-# Uninstallation script
+#DEBHELPER#
+
+exit 0
