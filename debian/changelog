@@ -1,3 +1,14 @@
+wlanpi-bluetooth (1.0.13) unstable; urgency=medium
+
+  * Move packaging to debhelper compat 13 and Standards-Version 4.7.0.
+    Units are now handled by dh_installsystemd: bt-agent and bt-network
+    stay enabled and are restarted on upgrade, and bt-timedpair stays
+    installed but is never enabled or started.
+  * postrm: run the debhelper snippets, so removal reloads systemd and
+    purge cleans up the unit enablement state.
+
+ -- Josh Schmelzle <josh@joshschmelzle.com>  Wed, 23 Sep 2026 19:55:15 -0400
+
 wlanpi-bluetooth (1.0.12) unstable; urgency=medium
 
   * bt-agent/bt-network: lazy-load from bluetooth.target instead of
