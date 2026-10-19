@@ -24,12 +24,13 @@ grep -q '^\s*dh_installsystemd --name=bt-agent$' "$RULES"
 grep -q '^\s*dh_installsystemd --name=bt-network$' "$RULES"
 grep -q '^\s*dh_installsystemd --no-enable --no-start --name=bt-timedpair$' "$RULES"
 grep -q 'systemctl reenable bt-agent.service bt-network.service' "$POSTINST"
-grep -q 'networkctl reload' "$POSTINST"
+grep -q '^\s*ischroot || networkctl reload 2>/dev/null || true$' "$POSTINST"
 
 # networkd disables DHCPServer= when the only address is link-local.
 PAN="$DIR/../etc/systemd/network/pan0.network"
 grep -q '^DHCPServer=yes$' "$PAN"
 grep -q '^Address=198\.18\.43\.1/24$' "$PAN"
+grep -q '^EmitRouter=no$' "$PAN"
 if grep -q '169\.254\.' "$PAN"; then exit 1; fi
 
 echo "Bluetooth service checks passed"
