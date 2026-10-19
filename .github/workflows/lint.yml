@@ -42,6 +42,9 @@ jobs:
             git ls-files -s | awk '$1 == "100755" {print $4}' | xargs -r grep -l '^#!.*sh'
           } | sort -u | xargs -r shellcheck -S warning
 
+      - name: Run service checks
+        run: bash tests/service-test.sh
+
   actionlint:
     name: actionlint
     runs-on: 'ubuntu-24.04-arm'
