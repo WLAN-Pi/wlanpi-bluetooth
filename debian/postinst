@@ -14,4 +14,6 @@ fi
 
 if [ "$1" = "configure" ] && [ -d /run/systemd/system ]; then
 	systemctl reenable bt-agent.service bt-network.service >/dev/null
+	# networkd reads pan0.network only at start; apply an upgraded file now.
+	ischroot || networkctl reload 2>/dev/null || true
 fi

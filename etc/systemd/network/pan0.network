@@ -1,12 +1,21 @@
 [Match]
 Name=pan0
-[Address]
-Address=169.254.43.1/24
-Scope=link
+
+# systemd-networkd will not serve DHCP from a link-local (169.254/16)
+# address, so the PAN uses 198.18.43.0/24, next to usb0's 198.18.42.0/24.
 [Network]
+Address=198.18.43.1/24
 DHCPServer=yes
 LinkLocalAddressing=no
 IPv6AcceptRA=no
+
+# pan0 has no carrier until a Bluetooth client joins; never hold up
+# network-online.target waiting for it.
+[Link]
+RequiredForOnline=no
+
 [DHCPServer]
+PoolOffset=9
+PoolSize=11
+EmitDNS=no
 EmitRouter=no
-PoolSize=10
