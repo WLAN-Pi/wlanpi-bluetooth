@@ -1,3 +1,21 @@
+wlanpi-bluetooth (1.0.14) unstable; urgency=medium
+
+  * Choose the Bluetooth adapter at run time instead of assuming hci0 (#17).
+    New wlanpi-bt-adapter picks onboard first, then a Bluetooth-only USB card
+    (M.2), then a combo dongle; bt-agent configures it and powers the others
+    off. bt-network and bt-timedpair use it and fail when there is none.
+  * A udev rule restarts bt-agent when an adapter is added or removed. bt-agent
+    waits up to 20 s for adapters to register, retries a failed setup every 5 s
+    and starts bt-network again, so PAN recovers after unplug and replug.
+    bt-agent now wants bt-network: use systemctl mask, not disable, to keep PAN
+    off.
+  * pan0 serves DHCP from 198.18.43.1/24 instead of 169.254.43.1. On Trixie,
+    systemd-networkd will not run a DHCP server on a link-local address, so
+    paired clients got no address. Leases are 198.18.43.9-19 with no router or
+    DNS. postinst reloads systemd-networkd so this applies without a reboot.
+
+ -- Josh Schmelzle <josh@joshschmelzle.com>  Tue, 20 Oct 2026 05:23:31 -0400
+
 wlanpi-bluetooth (1.0.13) unstable; urgency=medium
 
   * Move packaging to debhelper compat 13 and Standards-Version 4.7.0.
