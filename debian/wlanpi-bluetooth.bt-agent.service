@@ -5,6 +5,12 @@ Description=Bluetooth Auth Agent
 # so it started before BlueZ existed, blocked ~25s on BlueZ's D-Bus and aborted.
 After=bluetooth.service
 BindsTo=bluetooth.service
+# A restart on adapter hotplug also starts bt-network if it failed while there
+# was no adapter; PartOf alone only restarts it when it is running.
+Wants=bt-network.service
+# The udev rule only try-restarts, which never starts a failed unit, so never
+# let rate limiting leave it failed. RestartSec spaces the retries.
+StartLimitIntervalSec=0
 
 [Service]
 # The adapter ships rfkill soft-blocked (rfkill.default_state=0). Unblock it
@@ -15,6 +21,8 @@ ExecStart=/usr/bin/bt-agent --capability=NoInputNoOutput
 # Picks the adapter, waits for BlueZ to register it, configures it and powers
 # off the others. Rerun on adapter hotplug (90-wlanpi-bluetooth.rules).
 ExecStartPost=/usr/bin/wlanpi-bt-adapter --setup
+Restart=on-failure
+RestartSec=5
 # bluez-tools can hang forever unregistering its agent over D-Bus. Closing the
 # process connection unregisters it in BlueZ, so stop it directly.
 KillSignal=SIGKILL
