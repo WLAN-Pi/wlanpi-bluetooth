@@ -1,0 +1,110 @@
+#!/bin/bash
+# wlanpi-bt-adapter [--setup]
+#
+# Prints the Bluetooth adapter the WLAN Pi uses (hci0, hci1, ...), or exits 1
+# with no output when there is none. Adapter numbers follow probe order, so
+# hci0 can be a removable USB dongle. In order of preference:
+#   1. an onboard radio (UART or SDIO, not USB)
+#   2. a USB device that carries only Bluetooth, such as an M.2 card's
+#      Bluetooth (the card's Wi-Fi is on PCIe)
+#   3. a USB combo dongle (Wi-Fi and Bluetooth on one USB device)
+# Ties go to the lower sysfs device path, which is stable across boots.
+#
+# --setup (bt-agent.service) waits for BlueZ to register the adapter, sets its
+# alias, power (from /etc/wlanpi-bluetooth/state) and pairability, and powers
+# off every other adapter.
+#
+# WLANPI_BT_SYSFS overrides /sys for tests.
+set -u
+
+SYSFS=${WLANPI_BT_SYSFS:-/sys}
+STATE=/etc/wlanpi-bluetooth/state
+
+adapters() {
+    local h
+    for h in "$SYSFS"/class/bluetooth/hci*; do
+        # hciN:M entries are connections, not adapters.
+        case ${h##*/} in *:*) continue ;; esac
+        [ -e "$h/device" ] && echo "${h##*/}"
+    done
+}
+
+select_adapter() {
+    local name dev rank iface chosen
+    chosen=$(
+        for name in $(adapters); do
+            dev=$(readlink -f "$SYSFS/class/bluetooth/$name/device")
+            rank=1
+            if [ "$(basename "$(readlink -f "$dev/subsystem")")" = usb ]; then
+                # The adapter is a USB interface; its siblings are the other
+                # functions of the same USB device. e0 is the wireless
+                # controller class that Bluetooth interfaces use.
+                rank=2
+                for iface in "${dev%/*}"/*:*; do
+                    [ "$(cat "$iface/bInterfaceClass" 2>/dev/null)" = e0 ] || rank=3
+                done
+            fi
+            echo "$rank $dev $name"
+        done | LC_ALL=C sort -k1,1n -k2,2 | head -n 1
+    )
+    [ -n "$chosen" ] || return 1
+    echo "${chosen##* }"
+}
+
+registered() {
+    busctl --system get-property org.bluez "/org/bluez/$1" org.bluez.Adapter1 Address >/dev/null 2>&1
+}
+
+all_registered() {
+    local name
+    for name in $(adapters); do
+        registered "$name" || return 1
+    done
+}
+
+setup() {
+    local adapter other
+    # BlueZ registers an adapter on D-Bus seconds after the kernel adds it
+    # while the firmware loads, then powers it on (AutoEnable). bt-adapter
+    # aborts on an adapter BlueZ hasn't registered, and one powered off before
+    # BlueZ registers it comes back on. So wait for every adapter.
+    for _ in $(seq 40); do
+        if ! adapter=$(select_adapter); then
+            echo "No Bluetooth adapter"
+            return 0
+        fi
+        all_registered && break
+        sleep 0.5
+    done
+    if ! registered "$adapter"; then
+        echo "BlueZ has not registered $adapter" >&2
+        return 1
+    fi
+    echo "Using $adapter"
+
+    bt-adapter -a "$adapter" --set Alias "$(hostname)" || return 1
+    # BlueZ can still be bringing the adapter out of rfkill; retry.
+    for _ in $(seq 10); do
+        if bt-adapter -a "$adapter" --set Powered "$(cat "$STATE")"; then
+            break
+        fi
+        sleep 0.5
+        false
+    done || return 1
+    bt-adapter -a "$adapter" --set Pairable 0 || return 1
+
+    for other in $(adapters); do
+        [ "$other" = "$adapter" ] && continue
+        registered "$other" || continue
+        bt-adapter -a "$other" --set Powered 0 || true
+    done
+}
+
+case ${1:-} in
+    "") select_adapter ;;
+    --setup) setup ;;
+    *)
+        echo "Usage: wlanpi-bt-adapter [--setup]" >&2
+        exit 2
+        ;;
+esac

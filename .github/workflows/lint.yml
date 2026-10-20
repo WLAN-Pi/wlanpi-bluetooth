@@ -43,7 +43,9 @@ jobs:
           } | sort -u | xargs -r shellcheck -S warning
 
       - name: Run service checks
-        run: bash tests/service-test.sh
+        run: |
+          bash tests/service-test.sh
+          bash tests/bt-adapter-test.sh
 
   actionlint:
     name: actionlint

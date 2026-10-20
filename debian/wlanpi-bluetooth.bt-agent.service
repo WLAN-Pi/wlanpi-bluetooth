@@ -5,6 +5,12 @@ Description=Bluetooth Auth Agent
 # so it started before BlueZ existed, blocked ~25s on BlueZ's D-Bus and aborted.
 After=bluetooth.service
 BindsTo=bluetooth.service
+# A restart on adapter hotplug also starts bt-network if it failed while there
+# was no adapter; PartOf alone only restarts it when it is running.
+Wants=bt-network.service
+# The udev rule only try-restarts, which never starts a failed unit, so never
+# let rate limiting leave it failed. RestartSec spaces the retries.
+StartLimitIntervalSec=0
 
 [Service]
 # The adapter ships rfkill soft-blocked (rfkill.default_state=0). Unblock it
@@ -12,13 +18,11 @@ BindsTo=bluetooth.service
 # org.bluez.Error.Failed. BlueZ's AutoEnable then powers it on.
 ExecStartPre=/usr/sbin/rfkill unblock bluetooth
 ExecStart=/usr/bin/bt-agent --capability=NoInputNoOutput
-# BlueZ registers hci0 on D-Bus after bluetooth.service is up (seconds later
-# while Intel firmware downloads), and bt-adapter aborts if it isn't there yet.
-ExecStartPost=/bin/sh -c 'for i in $(seq 40); do /usr/bin/busctl --system get-property org.bluez /org/bluez/hci0 org.bluez.Adapter1 Address >/dev/null 2>&1 && exit 0; sleep 0.5; done; exit 1'
-ExecStartPost=/bin/sh -c "/usr/bin/bt-adapter -a hci0 --set Alias `hostname`"
-ExecStartPost=/bin/sh -c 'for i in 1 2 3 4 5 6 7 8 9 10; do /usr/bin/bt-adapter -a hci0 --set Powered "$(cat /etc/wlanpi-bluetooth/state)" && exit 0; sleep 0.5; done; exit 1'
-ExecStartPost=/bin/sh -c "/usr/bin/bt-adapter -a hci0 --set Pairable 0"
-ExecStartPost=/bin/sh -c "/usr/bin/hciconfig hci1 > /dev/null && /usr/bin/bt-adapter -a hci1 --set Powered 0 || :"
+# Picks the adapter, waits for BlueZ to register it, configures it and powers
+# off the others. Rerun on adapter hotplug (90-wlanpi-bluetooth.rules).
+ExecStartPost=/usr/bin/wlanpi-bt-adapter --setup
+Restart=on-failure
+RestartSec=5
 # bluez-tools can hang forever unregistering its agent over D-Bus. Closing the
 # process connection unregisters it in BlueZ, so stop it directly.
 KillSignal=SIGKILL

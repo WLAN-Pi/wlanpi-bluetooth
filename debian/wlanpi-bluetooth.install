@@ -1,2 +1,4 @@
 etc/systemd/network/* /etc/systemd/network/
 etc/wlanpi-bluetooth/state /etc/wlanpi-bluetooth/
+usr/bin/wlanpi-bt-adapter /usr/bin/
+usr/lib/udev/rules.d/90-wlanpi-bluetooth.rules /usr/lib/udev/rules.d/

@@ -1,0 +1,4 @@
+# Choose the adapter again when one is added or removed: restarting bt-agent
+# reruns wlanpi-bt-adapter --setup, and bt-network (PartOf=bt-agent) follows.
+# DEVTYPE=host leaves out connections (hciN:M, DEVTYPE=link).
+SUBSYSTEM=="bluetooth", ENV{DEVTYPE}=="host", ACTION=="add|remove", RUN+="/usr/bin/systemctl --no-block try-restart bt-agent.service"

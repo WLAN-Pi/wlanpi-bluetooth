@@ -2,8 +2,9 @@
 Description=Bluetooth Pair Agent
  
 [Service]
-ExecStart=bt-adapter -a hci0 --set PairableTimeout 30
-ExecStart=bt-adapter -a hci0 --set DiscoverableTimeout 30
-ExecStart=bt-adapter -a hci0 --set Pairable 1
-ExecStart=bt-adapter -a hci0 --set Discoverable 1
+ExecStart=/bin/sh -ec 'a=$(/usr/bin/wlanpi-bt-adapter); \
+    /usr/bin/bt-adapter -a "$$a" --set PairableTimeout 30; \
+    /usr/bin/bt-adapter -a "$$a" --set DiscoverableTimeout 30; \
+    /usr/bin/bt-adapter -a "$$a" --set Pairable 1; \
+    /usr/bin/bt-adapter -a "$$a" --set Discoverable 1'
 Type=oneshot
