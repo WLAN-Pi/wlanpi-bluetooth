@@ -3,13 +3,16 @@ Description=Bluetooth NEP PAN
 # Lazy-load when the controller exists, like bt-agent. Starting at
 # multi-user.target pulled bluetooth.target (and bt-agent) in before BlueZ was
 # up, and bt-network then died immediately.
-After=network.target bluetooth.service
+After=network.target bluetooth.service bt-agent.service
 BindsTo=bluetooth.service
+# bt-agent picks the adapter and restarts when one is added or removed; serve
+# the NAP on the same adapter.
+PartOf=bt-agent.service
 
 [Service]
 # See bt-agent.service: unblock the soft-blocked adapter before use.
 ExecStartPre=/usr/sbin/rfkill unblock bluetooth
-ExecStart=/usr/bin/bt-network -s nap pan0
+ExecStart=/bin/sh -c 'exec /usr/bin/bt-network -a "$(/usr/bin/wlanpi-bt-adapter)" -s nap pan0'
 Type=simple
 
 [Install]
