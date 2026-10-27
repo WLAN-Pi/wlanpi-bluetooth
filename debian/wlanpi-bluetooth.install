@@ -1,3 +1,6 @@
+debian/bt-agent.service usr/lib/systemd/system/
+debian/bt-network.service usr/lib/systemd/system/
+debian/bt-timedpair.service usr/lib/systemd/system/
 etc/systemd/network/* /etc/systemd/network/
 etc/wlanpi-bluetooth/state /etc/wlanpi-bluetooth/
 usr/bin/wlanpi-bt-adapter /usr/bin/
