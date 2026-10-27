@@ -7,7 +7,5 @@ override_dh_auto_install:
 	dh_auto_install -- prefix=/usr
 
 override_dh_installsystemd:
-	dh_installsystemd --name=bt-agent
-	dh_installsystemd --name=bt-network
-	# Started on demand to open a pairing window; never enabled or started.
-	dh_installsystemd --no-enable --no-start --name=bt-timedpair
+	dh_installsystemd bt-agent.service bt-network.service
+	dh_installsystemd --no-enable --no-start bt-timedpair.service
