@@ -2,12 +2,12 @@
 set -e
 
 DIR="$(dirname "$0")/../debian"
-AGENT="$DIR/wlanpi-bluetooth.bt-agent.service"
-NETWORK="$DIR/wlanpi-bluetooth.bt-network.service"
+AGENT="$DIR/bt-agent.service"
+NETWORK="$DIR/bt-network.service"
 CONTROL="$DIR/control"
 RULES="$DIR/rules"
 POSTINST="$DIR/postinst"
-TIMEDPAIR="$DIR/wlanpi-bluetooth.bt-timedpair.service"
+TIMEDPAIR="$DIR/bt-timedpair.service"
 UDEV="$DIR/../usr/lib/udev/rules.d/90-wlanpi-bluetooth.rules"
 
 # set -e ignores a command negated with !, so absence checks exit explicitly.
@@ -64,9 +64,11 @@ grep -q '^Build-Depends: debhelper-compat (= 13)$' "$CONTROL"
 grep -q '^3.0 (native)$' "$DIR/source/format"
 grep -q '^Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/$' "$DIR/copyright"
 if [ -e "$DIR/compat" ]; then exit 1; fi
-grep -q '^\s*dh_installsystemd --name=bt-agent$' "$RULES"
-grep -q '^\s*dh_installsystemd --name=bt-network$' "$RULES"
-grep -q '^\s*dh_installsystemd --no-enable --no-start --name=bt-timedpair$' "$RULES"
+grep -q '^\s*dh_installsystemd bt-agent.service bt-network.service$' "$RULES"
+grep -q '^\s*dh_installsystemd --no-enable --no-start bt-timedpair.service$' "$RULES"
+grep -q '^debian/bt-agent.service usr/lib/systemd/system/$' "$DIR/wlanpi-bluetooth.install"
+grep -q '^debian/bt-network.service usr/lib/systemd/system/$' "$DIR/wlanpi-bluetooth.install"
+grep -q '^debian/bt-timedpair.service usr/lib/systemd/system/$' "$DIR/wlanpi-bluetooth.install"
 grep -q 'systemctl reenable bt-agent.service bt-network.service' "$POSTINST"
 grep -q '^\s*ischroot || networkctl reload 2>/dev/null || true$' "$POSTINST"
 
