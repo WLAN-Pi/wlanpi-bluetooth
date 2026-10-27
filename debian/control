@@ -4,12 +4,12 @@ Priority: optional
 Maintainer: Jiri Brejcha <jirka@jiribrejcha.net>
 Uploaders: Adrian Granados <adrian@intuitibits.com>, Ben Toner <ben@numerousnetworks.co.uk>, Josh Schmelzle <josh@joshschmelzle.com>
 Build-Depends: debhelper-compat (= 13)
-Standards-Version: 4.7.0
+Standards-Version: 4.7.2
 Homepage: https://github.com/WLAN-Pi/wlanpi-bluetooth
 
 Package: wlanpi-bluetooth
-Architecture: any
+Architecture: all
 Multi-Arch: foreign
-Depends: ${misc:Depends}, ${shlibs:Depends}, bluez-tools, avahi-daemon, rfkill
+Depends: ${misc:Depends}, bluez-tools, avahi-daemon, rfkill
 Description: WLAN Pi - bluetooth
  Enable Bluetooth features on the WLAN Pi.
