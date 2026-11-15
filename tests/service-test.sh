@@ -69,7 +69,10 @@ grep -q '^\s*dh_installsystemd --no-enable --no-start bt-timedpair.service$' "$R
 grep -q '^debian/bt-agent.service usr/lib/systemd/system/$' "$DIR/wlanpi-bluetooth.install"
 grep -q '^debian/bt-network.service usr/lib/systemd/system/$' "$DIR/wlanpi-bluetooth.install"
 grep -q '^debian/bt-timedpair.service usr/lib/systemd/system/$' "$DIR/wlanpi-bluetooth.install"
-grep -q 'systemctl reenable bt-agent.service bt-network.service' "$POSTINST"
+grep -q '^\s*for unit in bt-agent.service bt-network.service; do$' "$POSTINST"
+grep -q '^\s*masked\*) ;;$' "$POSTINST"
+grep -q '^\s*\*) systemctl reenable "$unit" >/dev/null ;;$' "$POSTINST"
+if grep -q 'systemctl reenable bt-agent.service' "$POSTINST"; then exit 1; fi
 grep -q '^\s*ischroot || networkctl reload 2>/dev/null || true$' "$POSTINST"
 
 # networkd disables DHCPServer= when the only address is link-local.
