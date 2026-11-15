@@ -1,3 +1,14 @@
+wlanpi-bluetooth (1.0.15) unstable; urgency=medium
+
+  * An upgrade no longer fails when bt-agent or bt-network is masked.
+    The masked unit stays masked (#30).
+  * An upgrade restarts bt-network once instead of twice (#28).
+  * Build the package as Architecture: all with a native source format.
+    The installed files are unchanged apart from the added copyright
+    file (#27).
+
+ -- Josh Schmelzle <josh@joshschmelzle.com>  Sat, 14 Nov 2026 21:44:06 -0500
+
 wlanpi-bluetooth (1.0.14) unstable; urgency=medium
 
   * Choose the Bluetooth adapter at run time instead of assuming hci0 (#17).
