@@ -13,7 +13,13 @@ fi
 #DEBHELPER#
 
 if [ "$1" = "configure" ] && [ -d /run/systemd/system ]; then
-	systemctl reenable bt-agent.service bt-network.service >/dev/null
+	# reenable fails on a masked unit, and masking bt-network is how to keep PAN off.
+	for unit in bt-agent.service bt-network.service; do
+		case "$(systemctl is-enabled "$unit" 2>/dev/null)" in
+		masked*) ;;
+		*) systemctl reenable "$unit" >/dev/null ;;
+		esac
+	done
 	# networkd reads pan0.network only at start; apply an upgraded file now.
 	ischroot || networkctl reload 2>/dev/null || true
 fi
