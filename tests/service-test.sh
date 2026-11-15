@@ -69,10 +69,28 @@ grep -q '^\s*dh_installsystemd --no-enable --no-start bt-timedpair.service$' "$R
 grep -q '^debian/bt-agent.service usr/lib/systemd/system/$' "$DIR/wlanpi-bluetooth.install"
 grep -q '^debian/bt-network.service usr/lib/systemd/system/$' "$DIR/wlanpi-bluetooth.install"
 grep -q '^debian/bt-timedpair.service usr/lib/systemd/system/$' "$DIR/wlanpi-bluetooth.install"
-grep -q '^\s*for unit in bt-agent.service bt-network.service; do$' "$POSTINST"
-grep -q '^\s*masked\*) ;;$' "$POSTINST"
-grep -q '^\s*\*) systemctl reenable "$unit" >/dev/null ;;$' "$POSTINST"
-if grep -q 'systemctl reenable bt-agent.service' "$POSTINST"; then exit 1; fi
+REENABLE_LOOP=$(sed -n '/^\tfor unit in /,/^\tdone$/p' "$POSTINST")
+reenabled() {
+	(
+		agent=$1 network=$2
+		systemctl() {
+			local state=$network
+			if [ "$2" = bt-agent.service ]; then state=$agent; fi
+			case "$1" in
+			# systemctl is-enabled exits non-zero for a disabled or masked unit.
+			is-enabled) echo "$state"; [ "$state" = enabled ] ;;
+			reenable) echo "$2" >&3 ;;
+			esac
+		}
+		set -e
+		eval "$REENABLE_LOOP"
+	) 3>&1 | tr '\n' ' '
+}
+[ "$(reenabled enabled enabled)" = "bt-agent.service bt-network.service " ]
+[ "$(reenabled disabled disabled)" = "bt-agent.service bt-network.service " ]
+[ "$(reenabled enabled masked)" = "bt-agent.service " ]
+[ "$(reenabled enabled masked-runtime)" = "bt-agent.service " ]
+[ "$(reenabled masked disabled)" = "bt-network.service " ]
 grep -q '^\s*ischroot || networkctl reload 2>/dev/null || true$' "$POSTINST"
 
 # networkd disables DHCPServer= when the only address is link-local.
